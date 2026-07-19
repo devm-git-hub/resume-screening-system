@@ -1,0 +1,17 @@
+# Node
+node_modules/
+dist/
+build/
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Uploads
+backend/uploads/
+
+# OS
+.DS_Store
