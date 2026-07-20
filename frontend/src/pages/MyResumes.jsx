@@ -58,8 +58,10 @@ export default function MyResumes() {
               </div>
             )}
 
-            {resume.parsedData?.summary && (
-              <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{resume.parsedData.summary}</p>
+           {resume.status === "failed" && resume.parsingError && (
+              <p className="mt-3 text-sm text-rose-600 dark:text-rose-400">
+                ⚠ Parsing failed: {resume.parsingError}
+              </p>
             )}
           </div>
         ))}

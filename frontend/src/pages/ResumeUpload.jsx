@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { UploadCloud, FileCheck2, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { UploadCloud, FileCheck2, Loader2, LogIn } from "lucide-react";
 import { uploadResume } from "../redux/slices/resumeSlice";
 
 export default function ResumeUpload() {
@@ -9,6 +10,7 @@ export default function ResumeUpload() {
   const inputRef = useRef();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.resume);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const validTypes = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 
@@ -25,6 +27,29 @@ export default function ResumeUpload() {
     if (selectedFile) dispatch(uploadResume(selectedFile));
   };
 
+  // Not logged in: show a login prompt instead of the upload form.
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto mt-20 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10">
+        <UploadCloud size={40} className="mx-auto text-gray-400 mb-4" />
+        <h2 className="text-xl font-bold mb-2">Login required</h2>
+        <p className="text-gray-500 text-sm mb-6">
+          Please log in to upload and parse your resume with our AI.
+        </p>
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-xl"
+        >
+          <LogIn size={18} /> Login to Continue
+        </Link>
+        <p className="text-sm text-gray-500 mt-4">
+          Don't have an account? <Link to="/register" className="text-primary-600 font-medium">Create one</Link>
+        </p>
+      </div>
+    );
+  }
+
+  // Logged in: original upload UI, unchanged.
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>

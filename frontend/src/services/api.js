@@ -1,7 +1,4 @@
-// services/api.js
-// Central Axios instance: attaches JWT access token to every request and
-// auto-refreshes it once on a 401 before falling back to logout.
-
+﻿// services/api.js
 import axios from "axios";
 
 const api = axios.create({
@@ -23,10 +20,15 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry && !isRefreshing) {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       isRefreshing = true;
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL || "/api"}/auth/refresh`,
           { refreshToken }

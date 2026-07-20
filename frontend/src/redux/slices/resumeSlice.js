@@ -9,8 +9,22 @@ export const uploadResume = createAsyncThunk("resume/upload", async (file, { rej
     const { data } = await api.post("/resumes/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    toast.success("Resume uploaded and parsed successfully");
-    return data.data;
+
+    const resume = data.data;
+
+    // The HTTP call succeeded (file was saved), but AI parsing itself
+    // may have failed - check the resume's own status field to know.
+    if (resume.status === "failed") {
+      toast.error(
+        `Resume uploaded, but AI parsing failed: ${resume.parsingError || "unknown error"}`
+      );
+    } else if (resume.status === "parsed") {
+      toast.success("Resume uploaded and parsed successfully");
+    } else {
+      toast.success("Resume uploaded, parsing in progress...");
+    }
+
+    return resume;
   } catch (err) {
     toast.error(err.response?.data?.message || "Upload failed");
     return rejectWithValue(err.response?.data?.message);

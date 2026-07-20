@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { Sun, Moon, LogOut, Menu } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Sun, Moon, LogOut, LogIn, Menu } from "lucide-react";
 import { toggleTheme, toggleSidebar } from "../redux/slices/uiSlice";
 import { logout } from "../redux/slices/authSlice";
 
@@ -9,7 +9,7 @@ export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { theme } = useSelector((state) => state.ui);
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -33,7 +33,7 @@ export default function Navbar() {
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
 
-        {user && (
+        {isAuthenticated && user && (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center text-sm font-semibold">
               {user.name?.[0]?.toUpperCase()}
@@ -42,9 +42,20 @@ export default function Navbar() {
           </div>
         )}
 
-        <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" title="Logout">
-          <LogOut size={18} />
-        </button>
+        {!isAuthenticated && (
+          <Link
+            to="/login"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <LogIn size={16} /> Login
+          </Link>
+        )}
+
+        {isAuthenticated && (
+          <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" title="Logout">
+            <LogOut size={18} />
+          </button>
+        )}
       </div>
     </header>
   );

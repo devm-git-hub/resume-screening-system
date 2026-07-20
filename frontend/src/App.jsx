@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -23,15 +24,32 @@ import Analytics from "./pages/Analytics";
 
 import AdminDashboard from "./pages/AdminDashboard";
 
+function RootRedirect() {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  if (isAuthenticated) {
+    if (user?.role === "recruiter") return <Navigate to="/recruiter/dashboard" replace />;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/candidate/dashboard" replace />;
+  }
+
+  return (
+    <DashboardLayout>
+      <CandidateDashboard />
+    </DashboardLayout>
+  );
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Candidate routes */}
+      <Route path="/upload" element={<ResumeUpload />} />
+
       <Route
         path="/candidate"
         element={
@@ -46,7 +64,6 @@ export default function App() {
         <Route path="matches" element={<JobMatches />} />
       </Route>
 
-      {/* Recruiter routes */}
       <Route
         path="/recruiter"
         element={
@@ -63,7 +80,6 @@ export default function App() {
         <Route path="analytics" element={<Analytics />} />
       </Route>
 
-      {/* Admin routes */}
       <Route
         path="/admin"
         element={
@@ -71,7 +87,7 @@ export default function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }
-      >
+      > 
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="candidates" element={<CandidateSearch />} />
         <Route path="jobs" element={<JobsList />} />
