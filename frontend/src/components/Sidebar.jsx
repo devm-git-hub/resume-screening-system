@@ -12,8 +12,10 @@ const recruiterLinks = [
   { to: "/recruiter/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
+
 const candidateLinks = [
   { to: "/candidate/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/candidate/jobs", label: "Browse Jobs", icon: Briefcase },
   { to: "/candidate/resumes", label: "My Resumes", icon: FileText },
   { to: "/candidate/upload", label: "Upload Resume", icon: UploadCloud },
   { to: "/candidate/matches", label: "Job Matches", icon: Briefcase },

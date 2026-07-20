@@ -24,6 +24,8 @@ import Analytics from "./pages/Analytics";
 
 import AdminDashboard from "./pages/AdminDashboard";
 
+import BrowseJobs from "./pages/BrowseJobs";
+
 function RootRedirect() {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
@@ -62,6 +64,7 @@ export default function App() {
         <Route path="upload" element={<ResumeUpload />} />
         <Route path="resumes" element={<MyResumes />} />
         <Route path="matches" element={<JobMatches />} />
+        <Route path="jobs" element={<BrowseJobs />} />
       </Route>
 
       <Route
