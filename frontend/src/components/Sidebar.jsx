@@ -1,3 +1,4 @@
+import AnimatedLogo from "./AnimatedLogo";
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -42,7 +43,7 @@ export default function Sidebar() {
       }`}
     >
       <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200 dark:border-gray-800">
-        <div className="w-8 h-8 rounded-lg bg-primary-600 text-white flex items-center justify-center font-bold">R</div>
+       <AnimatedLogo size={32} letter="R" />
         <span className="font-bold text-lg">ResuMatch AI</span>
       </div>
 
