@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import AnimatedLogo from "./AnimatedLogo";
 import React from "react";
 import { NavLink } from "react-router-dom";
@@ -44,8 +45,37 @@ export default function Sidebar() {
     >
       <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200 dark:border-gray-800">
        <AnimatedLogo size={32} letter="R" />
-        <span className="font-bold text-lg">ResuMatch AI</span>
-      </div>
+        {/* <span className="font-bold text-lg">ResuMatch AI</span> */}
+
+
+        <motion.span
+  initial={{ opacity: 0, x: -15 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  whileHover={{
+    scale: 1.05,
+    textShadow: "0px 0px 12px rgba(59,130,246,0.8)",
+  }}
+  className="font-bold text-lg cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 bg-[length:200%_200%] bg-clip-text text-transparent"
+>
+  <motion.span
+    animate={{
+      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+    }}
+    transition={{
+      duration: 5,
+      repeat: Infinity,
+      ease: "linear",
+    }}
+    className="inline-block bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 bg-[length:200%_200%] bg-clip-text text-transparent"
+  >
+    ResuMatch AI
+  </motion.span>
+</motion.span>  
+
+
+</div>
+
 
       <nav className="p-4 space-y-1">
         {links.map(({ to, label, icon: Icon }) => (
@@ -68,3 +98,5 @@ export default function Sidebar() {
     </aside>
   );
 }
+
+
