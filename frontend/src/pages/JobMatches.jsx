@@ -2,16 +2,15 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapPin, Briefcase } from "lucide-react";
 import MatchScoreBadge from "../components/MatchScoreBadge";
-import { fetchMatchesForCandidate } from "../redux/slices/matchSlice";
+import { fetchMyMatches } from "../redux/slices/matchSlice";
 
 export default function JobMatches() {
   const dispatch = useDispatch();
-  const { myMatches } = useSelector((state) => state.match);
-  const { user } = useSelector((state) => state.auth);
+  const { myMatches, loading } = useSelector((state) => state.match);
 
   useEffect(() => {
-    if (user?.candidateId) dispatch(fetchMatchesForCandidate(user.candidateId));
-  }, [dispatch, user]);
+    dispatch(fetchMyMatches());
+  }, [dispatch]);
 
   return (
     <div className="space-y-6">
@@ -20,9 +19,13 @@ export default function JobMatches() {
         Ranked using semantic similarity (Sentence-BERT) + skill, experience, and education overlap.
       </p>
 
+      {loading && <p className="text-sm text-gray-500">Loading your matches...</p>}
+
       <div className="grid gap-4">
-        {myMatches.length === 0 && (
-          <p className="text-sm text-gray-500">No matches yet. Make sure you've uploaded a resume.</p>
+        {!loading && myMatches.length === 0 && (
+          <p className="text-sm text-gray-500">
+            No matches yet. Make sure you've uploaded a resume and a recruiter has run AI matching for a job.
+          </p>
         )}
         {myMatches.map((m) => (
           <div key={m._id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">

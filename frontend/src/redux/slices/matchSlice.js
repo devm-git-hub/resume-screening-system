@@ -25,11 +25,12 @@ export const fetchMatchesForJob = createAsyncThunk(
   }
 );
 
-export const fetchMatchesForCandidate = createAsyncThunk(
-  "match/fetchForCandidate",
-  async (candidateId, { rejectWithValue }) => {
+// Fetches the LOGGED-IN candidate's own matches - no candidateId needed.
+export const fetchMyMatches = createAsyncThunk(
+  "match/fetchMine",
+  async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get(`/matches/candidate/${candidateId}`);
+      const { data } = await api.get("/matches/mine");
       return data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
@@ -52,9 +53,12 @@ const matchSlice = createSlice({
         state.rankedCandidates = action.payload.data;
         state.pagination = action.payload.pagination;
       })
-      .addCase(fetchMatchesForCandidate.fulfilled, (state, action) => {
+      .addCase(fetchMyMatches.pending, (state) => { state.loading = true; })
+      .addCase(fetchMyMatches.fulfilled, (state, action) => {
+        state.loading = false;
         state.myMatches = action.payload;
-      });
+      })
+      .addCase(fetchMyMatches.rejected, (state) => { state.loading = false; });
   },
 });
 

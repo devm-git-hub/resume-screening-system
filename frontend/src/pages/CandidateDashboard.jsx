@@ -5,27 +5,26 @@ import { FileText, Briefcase, TrendingUp, UploadCloud } from "lucide-react";
 import DashboardCard from "../components/DashboardCard";
 import MatchScoreBadge from "../components/MatchScoreBadge";
 import { fetchMyResumes } from "../redux/slices/resumeSlice";
-import { fetchMatchesForCandidate } from "../redux/slices/matchSlice";
+import { fetchMyMatches } from "../redux/slices/matchSlice";
 
 export default function CandidateDashboard() {
   const dispatch = useDispatch();
   const { list: resumes } = useSelector((state) => state.resume);
   const { myMatches } = useSelector((state) => state.match);
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    if (!isAuthenticated) return; // guest view on "/" - skip authenticated calls
     dispatch(fetchMyResumes());
-    // In a real app the candidateId would come from the user's profile fetch;
-    // simplified here for demonstration purposes.
-    if (user?.candidateId) dispatch(fetchMatchesForCandidate(user.candidateId));
-  }, [dispatch, user]);
+    dispatch(fetchMyMatches());
+  }, [dispatch, isAuthenticated]);
 
   const bestMatch = myMatches?.[0];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Welcome back, {user?.name?.split(" ")[0]} 👋</h1>
+        <h1 className="text-2xl font-bold">Welcome back, {user?.name?.split(" ")[0] || "Guest"} 👋</h1>
         <p className="text-gray-500 text-sm">Here's how your job search is going.</p>
       </div>
 
@@ -51,7 +50,7 @@ export default function CandidateDashboard() {
         <h2 className="font-semibold mb-4">Top Job Matches</h2>
         {myMatches.length === 0 && (
           <p className="text-sm text-gray-500">
-            No matches yet. Upload a resume and browse jobs to see your compatibility scores here.
+            No matches yet. Upload a resume and wait for a recruiter to run matching to see your compatibility scores here.
           </p>
         )}
         <div className="space-y-3">
