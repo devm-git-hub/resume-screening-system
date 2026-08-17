@@ -108,4 +108,3 @@ export default function Register() {
     </div> 
   ); 
 } 
-    integrate for this also
