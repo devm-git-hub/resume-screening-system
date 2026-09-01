@@ -1,6 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { MapPin, Briefcase, Clock } from "lucide-react";
+import { MapPin, Briefcase, Clock, CalendarClock } from "lucide-react";
 import api from "../services/api";
+
+// Formats an ISO date string into something like "Aug 17, 2026, 9:42 PM"
+function formatPostedAt(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+// Returns a friendly relative label like "2 hours ago", "Posted today", "3 days ago"
+function timeAgo(isoString) {
+  if (!isoString) return "";
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min${diffMins === 1 ? "" : "s"} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  return formatPostedAt(isoString);
+}
 
 export default function BrowseJobs() {
   const [jobs, setJobs] = useState([]);
@@ -38,10 +66,16 @@ export default function BrowseJobs() {
               </span>
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-gray-500 mt-3">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mt-3">
               <span className="flex items-center gap-1"><MapPin size={12} /> {job.location || "Remote"}</span>
               <span className="flex items-center gap-1"><Briefcase size={12} /> {job.employmentType}</span>
               <span className="flex items-center gap-1"><Clock size={12} /> {job.minExperienceYears}+ yrs exp</span>
+              <span
+                className="flex items-center gap-1 text-gray-400"
+                title={formatPostedAt(job.createdAt)}
+              >
+                <CalendarClock size={12} /> {timeAgo(job.createdAt)}
+              </span>
             </div>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">
