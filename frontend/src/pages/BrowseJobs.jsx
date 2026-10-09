@@ -1,32 +1,130 @@
-import React, { useEffect, useState } from "react";
-import { MapPin, Briefcase, Clock, CalendarClock } from "lucide-react";
-import api from "../services/api";
+// import React, { useEffect, useState } from "react";
+// import { MapPin, Briefcase, Clock, CalendarClock } from "lucide-react";
+// import api from "../services/api";
 
-// Formats an ISO date string into something like "Aug 17, 2026, 9:42 PM"
+// // Formats an ISO date string into something like "Aug 17, 2026, 9:42 PM"
+// function formatPostedAt(isoString) {
+//   if (!isoString) return "";
+//   const date = new Date(isoString);
+//   return date.toLocaleString(undefined, {
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//     hour: "numeric",
+//     minute: "2-digit",
+//   });
+// }
+
+// // Returns a friendly relative label like "2 hours ago", "Posted today", "3 days ago"
+// function timeAgo(isoString) {
+//   if (!isoString) return "";
+//   const diffMs = Date.now() - new Date(isoString).getTime();
+//   const diffMins = Math.floor(diffMs / 60000);
+//   const diffHours = Math.floor(diffMins / 60);
+//   const diffDays = Math.floor(diffHours / 24);
+
+//   if (diffMins < 1) return "Just now";
+//   if (diffMins < 60) return `${diffMins} min${diffMins === 1 ? "" : "s"} ago`;
+//   if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+//   if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+//   return formatPostedAt(isoString);
+// }
+
+// export default function BrowseJobs() {
+//   const [jobs, setJobs] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     api.get("/jobs", { params: { limit: 20 } })
+//       .then((res) => setJobs(res.data.data))
+//       .finally(() => setLoading(false));
+//   }, []);
+
+//   return (
+//     <div className="space-y-6">
+//       <div>
+//         <h1 className="text-2xl font-bold">Browse Jobs</h1>
+//         <p className="text-gray-500 text-sm">All open positions posted by recruiters.</p>
+//       </div>
+
+//       {loading && <p className="text-sm text-gray-500">Loading jobs...</p>}
+
+//       <div className="grid gap-4">
+//         {!loading && jobs.length === 0 && (
+//           <p className="text-sm text-gray-500">No jobs posted yet. Check back later.</p>
+//         )}
+
+//         {jobs.map((job) => (
+//           <div key={job._id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+//             <div className="flex items-start justify-between">
+//               <div>
+//                 <h3 className="font-semibold text-lg">{job.title}</h3>
+//                 <p className="text-sm text-gray-500">{job.recruiter?.companyName}</p>
+//               </div>
+//               <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 capitalize">
+//                 {job.status}
+//               </span>
+//             </div>
+
+//             <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mt-3">
+//               <span className="flex items-center gap-1"><MapPin size={12} /> {job.location || "Remote"}</span>
+//               <span className="flex items-center gap-1"><Briefcase size={12} /> {job.employmentType}</span>
+//               <span className="flex items-center gap-1"><Clock size={12} /> {job.minExperienceYears}+ yrs exp</span>
+//               <span
+//                 className="flex items-center gap-1 text-gray-400"
+//                 title={formatPostedAt(job.createdAt)}
+//               >
+//                 <CalendarClock size={12} /> {timeAgo(job.createdAt)}
+//               </span>
+//             </div>
+
+//             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">
+//               {job.description}
+//             </p>
+
+//             {job.requiredSkills?.length > 0 && (
+//               <div className="mt-3 flex flex-wrap gap-1.5">
+//                 {job.requiredSkills.map((s) => (
+//                   <span key={s} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+//                     {s}
+//                   </span>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+import React, { useEffect, useState } from "react";
+import { Clock, CalendarClock } from "lucide-react";
+import api from "../services/api";
+import Card from "../components/Card";
+import JobMeta from "../components/JobMeta";
+import StatusBadge from "../components/StatusBadge";
+
+// e.g. "Aug 17, 2026, 9:42 PM"
 function formatPostedAt(isoString) {
   if (!isoString) return "";
-  const date = new Date(isoString);
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  return new Date(isoString).toLocaleString(undefined, {
+    year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
   });
 }
 
-// Returns a friendly relative label like "2 hours ago", "Posted today", "3 days ago"
+// "Just now", "2 hours ago", "3 days ago" (full date after a week)
 function timeAgo(isoString) {
   if (!isoString) return "";
-  const diffMs = Date.now() - new Date(isoString).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
+  const mins = Math.floor((Date.now() - new Date(isoString).getTime()) / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  const plural = (n, unit) => `${n} ${unit}${n === 1 ? "" : "s"} ago`;
 
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} min${diffMins === 1 ? "" : "s"} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  if (mins < 1) return "Just now";
+  if (mins < 60) return plural(mins, "min");
+  if (hours < 24) return plural(hours, "hour");
+  if (days < 7) return plural(days, "day");
   return formatPostedAt(isoString);
 }
 
@@ -50,48 +148,35 @@ export default function BrowseJobs() {
       {loading && <p className="text-sm text-gray-500">Loading jobs...</p>}
 
       <div className="grid gap-4">
-        {!loading && jobs.length === 0 && (
-          <p className="text-sm text-gray-500">No jobs posted yet. Check back later.</p>
-        )}
+        {!loading && jobs.length === 0 && <p className="text-sm text-gray-500">No jobs posted yet. Check back later.</p>}
 
         {jobs.map((job) => (
-          <div key={job._id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+          <Card key={job._id}>
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-lg">{job.title}</h3>
                 <p className="text-sm text-gray-500">{job.recruiter?.companyName}</p>
               </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 capitalize">
-                {job.status}
-              </span>
+              <StatusBadge status={job.status} />
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mt-3">
-              <span className="flex items-center gap-1"><MapPin size={12} /> {job.location || "Remote"}</span>
-              <span className="flex items-center gap-1"><Briefcase size={12} /> {job.employmentType}</span>
+            <JobMeta job={job} className="mt-3">
               <span className="flex items-center gap-1"><Clock size={12} /> {job.minExperienceYears}+ yrs exp</span>
-              <span
-                className="flex items-center gap-1 text-gray-400"
-                title={formatPostedAt(job.createdAt)}
-              >
+              <span className="flex items-center gap-1 text-gray-400" title={formatPostedAt(job.createdAt)}>
                 <CalendarClock size={12} /> {timeAgo(job.createdAt)}
               </span>
-            </div>
+            </JobMeta>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">
-              {job.description}
-            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">{job.description}</p>
 
             {job.requiredSkills?.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {job.requiredSkills.map((s) => (
-                  <span key={s} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                    {s}
-                  </span>
+                  <span key={s} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">{s}</span>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         ))}
       </div>
     </div>

@@ -1,3 +1,23 @@
+// // routes/matchRoutes.js
+// const express = require("express");
+// const router = express.Router();
+// const {
+//   runMatchingForJob,
+//   getMatchesForJob,
+//   getMatchesForCandidate,
+//   getMyMatches,
+// } = require("../controllers/matchController");
+// const { protect, authorize } = require("../middleware/auth");
+
+// router.post("/run/:jobId", protect, authorize("recruiter"), runMatchingForJob);
+// router.get("/job/:jobId", protect, authorize("recruiter"), getMatchesForJob);
+// router.get("/mine", protect, authorize("candidate"), getMyMatches);
+// router.get("/candidate/:candidateId", protect, getMatchesForCandidate);
+
+// module.exports = router;
+
+
+
 // routes/matchRoutes.js
 const express = require("express");
 const router = express.Router();
@@ -8,10 +28,12 @@ const {
   getMyMatches,
 } = require("../controllers/matchController");
 const { protect, authorize } = require("../middleware/auth");
+const { attachCandidate } = require("../middleware/profile");
 
 router.post("/run/:jobId", protect, authorize("recruiter"), runMatchingForJob);
 router.get("/job/:jobId", protect, authorize("recruiter"), getMatchesForJob);
-router.get("/mine", protect, authorize("candidate"), getMyMatches);
+// "/mine" must stay above "/candidate/:candidateId"
+router.get("/mine", protect, authorize("candidate"), attachCandidate, getMyMatches);
 router.get("/candidate/:candidateId", protect, getMatchesForCandidate);
 
 module.exports = router;
