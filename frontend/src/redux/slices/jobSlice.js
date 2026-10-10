@@ -31,6 +31,19 @@ export const fetchJobById = createAsyncThunk("job/fetchOne", async (id, { reject
   }
 });
 
+// Only works for the recruiter who posted the job (the server enforces it)
+export const deleteJob = createAsyncThunk("job/delete", async (id, { rejectWithValue }) => {
+  try {
+    await api.delete(`/jobs/${id}`);
+    toast.success("Job deleted");
+    return id;
+  } catch (err) {
+    const message = err.response?.data?.message || "Failed to delete job";
+    toast.error(message);
+    return rejectWithValue(message);
+  }
+});
+
 const jobSlice = createSlice({
   name: "job",
   initialState: { list: [], pagination: {}, current: null, loading: false },
@@ -43,11 +56,15 @@ const jobSlice = createSlice({
         state.list = action.payload.data;
         state.pagination = action.payload.pagination;
       })
+      .addCase(fetchJobs.rejected, (state) => { state.loading = false; })
       .addCase(fetchJobById.fulfilled, (state, action) => {
         state.current = action.payload;
       })
       .addCase(createJob.fulfilled, (state, action) => {
-        state.list.unshift(action.payload);
+        state.list.unshift({ ...action.payload, isOwner: true });
+      })
+      .addCase(deleteJob.fulfilled, (state, action) => {
+        state.list = state.list.filter((job) => job._id !== action.payload);
       });
   },
 });

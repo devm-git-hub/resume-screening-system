@@ -73,4 +73,4 @@ const matchResumesToJob = async (job, resumes) => {
   await rerankJob(job._id);
 };
 
-module.exports = { matchResumesToJob };
+module.exports = { matchResumesToJob, rerankJob };
