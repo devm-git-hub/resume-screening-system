@@ -11,20 +11,21 @@ export const uploadResume = createAsyncThunk("resume/upload", async (file, { rej
     });
 
     const resume = data.data;
+    const matches = data.matches || [];
 
-    // The HTTP call succeeded (file was saved), but AI parsing itself
-    // may have failed - check the resume's own status field to know.
     if (resume.status === "failed") {
-      toast.error(
-        `Resume uploaded, but AI parsing failed: ${resume.parsingError || "unknown error"}`
-      );
+      toast.error(`Resume uploaded, but AI parsing failed: ${resume.parsingError || "unknown error"}`);
     } else if (resume.status === "parsed") {
-      toast.success("Resume uploaded and parsed successfully");
+      toast.success(
+        matches.length
+          ? `Resume parsed and matched against ${matches.length} job${matches.length === 1 ? "" : "s"}`
+          : "Resume parsed successfully"
+      );
     } else {
       toast.success("Resume uploaded, parsing in progress...");
     }
 
-    return resume;
+    return { resume, matches };
   } catch (err) {
     toast.error(err.response?.data?.message || "Upload failed");
     return rejectWithValue(err.response?.data?.message);
@@ -53,14 +54,19 @@ export const deleteResume = createAsyncThunk("resume/delete", async (id, { rejec
 
 const resumeSlice = createSlice({
   name: "resume",
-  initialState: { list: [], loading: false, error: null },
+  // lastMatches = the job matches returned by the most recent upload
+  initialState: { list: [], lastMatches: [], loading: false, error: null },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(uploadResume.pending, (state) => { state.loading = true; })
+      .addCase(uploadResume.pending, (state) => {
+        state.loading = true;
+        state.lastMatches = [];
+      })
       .addCase(uploadResume.fulfilled, (state, action) => {
         state.loading = false;
-        state.list.unshift(action.payload);
+        state.list.unshift(action.payload.resume);
+        state.lastMatches = action.payload.matches;
       })
       .addCase(uploadResume.rejected, (state) => { state.loading = false; })
       .addCase(fetchMyResumes.fulfilled, (state, action) => {
@@ -68,6 +74,7 @@ const resumeSlice = createSlice({
       })
       .addCase(deleteResume.fulfilled, (state, action) => {
         state.list = state.list.filter((r) => r._id !== action.payload);
+        state.lastMatches = state.lastMatches.filter((m) => String(m.resume) !== String(action.payload));
       });
   },
 });

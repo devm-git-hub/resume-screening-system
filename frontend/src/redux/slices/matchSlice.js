@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import { deleteResume, uploadResume } from "./resumeSlice";
 
 export const runMatching = createAsyncThunk("match/run", async (jobId, { rejectWithValue }) => {
   try {
@@ -49,6 +50,7 @@ const matchSlice = createSlice({
         state.loading = false;
         state.rankedCandidates = action.payload;
       })
+      .addCase(runMatching.rejected, (state) => { state.loading = false; })
       .addCase(fetchMatchesForJob.fulfilled, (state, action) => {
         state.rankedCandidates = action.payload.data;
         state.pagination = action.payload.pagination;
@@ -58,7 +60,20 @@ const matchSlice = createSlice({
         state.loading = false;
         state.myMatches = action.payload;
       })
-      .addCase(fetchMyMatches.rejected, (state) => { state.loading = false; });
+      .addCase(fetchMyMatches.rejected, (state) => { state.loading = false; })
+      // After an upload, put the new resume's matches into the candidate's list
+      // (replacing any older matches from the same resume), best score first.
+      .addCase(uploadResume.fulfilled, (state, action) => {
+        const newId = String(action.payload.resume._id);
+        const others = state.myMatches.filter((m) => String(m.resume) !== newId);
+        state.myMatches = [...action.payload.matches, ...others].sort(
+          (a, b) => b.finalMatchPercentage - a.finalMatchPercentage
+        );
+      })
+      // When a resume is deleted, drop the matches that came from it.
+      .addCase(deleteResume.fulfilled, (state, action) => {
+        state.myMatches = state.myMatches.filter((m) => String(m.resume) !== String(action.payload));
+      });
   },
 });
 
