@@ -1,38 +1,3 @@
-// import React from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { Link } from "react-router-dom";
-// import { LogIn, Menu } from "lucide-react";
-// import { toggleSidebar } from "../redux/slices/uiSlice";
-
-// export default function Navbar() {
-//   const dispatch = useDispatch();
-//   const { isAuthenticated } = useSelector((state) => state.auth);
-
-//   return (
-//     <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
-//       <button className="lg:hidden p-2" onClick={() => dispatch(toggleSidebar())}>
-//         <Menu size={20} />
-//       </button>
-
-//       <h1 className="font-semibold text-lg hidden md:block">AI Resume Screening & Job Matching</h1>
-
-//       {/* Guests still get a Login button; logged-in users see their profile in the sidebar */}
-//       <div className="flex items-center gap-3">
-//         {!isAuthenticated && (
-//           <Link
-//             to="/login"
-//             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-//           >
-//             <LogIn size={16} /> Login
-//           </Link>
-//         )}
-//       </div>
-//     </header>
-//   );
-// }
-
-
-
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -71,6 +36,14 @@ const NAV_LINKS = {
   ],
 };
 
+// Shared theme classes (light first, `dark:` = the navy look from the design)
+const ICON_BTN =
+  "p-2 rounded-full transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5";
+const DROPDOWN =
+  "absolute right-0 mt-3 rounded-2xl overflow-hidden z-40 bg-white border border-gray-200 shadow-xl dark:bg-[#0f172a] dark:border-white/10 dark:shadow-black/40";
+const DROPDOWN_ROW = "hover:bg-gray-50 dark:hover:bg-white/5";
+const DIVIDER_BORDER = "border-gray-200 dark:border-white/10";
+
 // Calls onOutside() when the user clicks anywhere outside `ref`
 function useClickOutside(ref, onOutside) {
   const callback = useRef(onOutside);
@@ -95,8 +68,8 @@ function NavItem({ to, label, icon: Icon, end, onClick, mobile }) {
           mobile ? "px-4 py-3" : "px-4 py-2"
         } ${
           isActive
-            ? "bg-indigo-600/50 text-white shadow-[0_0_24px_rgba(79,70,229,0.45)]"
-            : "text-gray-300 hover:text-white hover:bg-white/5"
+            ? "bg-indigo-50 text-indigo-700 shadow-sm dark:bg-indigo-600/50 dark:text-white dark:shadow-[0_0_24px_rgba(79,70,229,0.45)]"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5"
         }`
       }
     >
@@ -116,13 +89,13 @@ function ThemeSwitchRow() {
       onClick={() => dispatch(toggleTheme())}
       role="switch"
       aria-checked={isDark}
-      className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
+      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 transition-colors ${DROPDOWN_ROW}`}
     >
       <span className="flex items-center gap-3">
         {isDark ? <Sun size={16} /> : <Moon size={16} />}
         Dark mode
       </span>
-      <span className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isDark ? "bg-indigo-500" : "bg-gray-600"}`}>
+      <span className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isDark ? "bg-indigo-500" : "bg-gray-300"}`}>
         <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${isDark ? "translate-x-4" : "translate-x-0.5"}`} />
       </span>
     </button>
@@ -146,30 +119,30 @@ function NotificationBell({ notifications }) {
           setSeenCount(notifications.length);
         }}
         aria-label="Notifications"
-        className="relative p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+        className={`relative ${ICON_BTN}`}
       >
         <Bell size={20} />
-        {showDot && <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-[#0a1020]" />}
+        {showDot && <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#0a1020]" />}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-80 max-w-[90vw] rounded-2xl bg-[#0f172a] border border-white/10 shadow-xl shadow-black/40 overflow-hidden z-40">
-          <div className="px-4 py-3 border-b border-white/10 text-sm font-semibold text-white">Notifications</div>
+        <div className={`${DROPDOWN} w-80 max-w-[90vw]`}>
+          <div className={`px-4 py-3 border-b text-sm font-semibold text-gray-900 dark:text-white ${DIVIDER_BORDER}`}>Notifications</div>
           {notifications.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-gray-400 text-center">You're all caught up.</p>
+            <p className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400 text-center">You're all caught up.</p>
           ) : (
             notifications.map((m) => (
               <Link
                 key={m._id}
                 to="/candidate/matches"
                 onClick={() => setOpen(false)}
-                className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
+                className={`flex items-start justify-between gap-3 px-4 py-3 transition-colors ${DROPDOWN_ROW}`}
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-white truncate">{m.job?.title}</p>
-                  <p className="text-xs text-gray-400">New match for your resume</p>
+                  <p className="text-sm text-gray-900 dark:text-white truncate">{m.job?.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">New match for your resume</p>
                 </div>
-                <span className="text-xs font-semibold text-emerald-400 shrink-0">{Math.round(m.finalMatchPercentage)}%</span>
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">{Math.round(m.finalMatchPercentage)}%</span>
               </Link>
             ))
           )}
@@ -196,31 +169,31 @@ function ProfileMenu({ user }) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full hover:bg-white/5 transition-colors"
+        className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
       >
         <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white flex items-center justify-center font-semibold">
           {user.name?.[0]?.toUpperCase()}
         </div>
         <div className="hidden sm:block text-left leading-tight">
-          <p className="text-sm font-semibold text-white">{user.name}</p>
-          <p className="text-xs text-gray-400 capitalize">{user.role}</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
         </div>
-        <ChevronDown size={16} className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={16} className={`text-gray-500 dark:text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-64 rounded-2xl bg-[#0f172a] border border-white/10 shadow-xl shadow-black/40 overflow-hidden z-40">
-          <div className="px-4 py-3 border-b border-white/10">
-            <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-            <p className="text-xs text-gray-400 truncate">{user.email}</p>
-            <span className="inline-block mt-2 text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 capitalize">
+        <div className={`${DROPDOWN} w-64`}>
+          <div className={`px-4 py-3 border-b ${DIVIDER_BORDER}`}>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+            <span className="inline-block mt-2 text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 capitalize">
               {user.role}
             </span>
           </div>
           <ThemeSwitchRow />
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-white/10"
+            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors border-t ${DIVIDER_BORDER}`}
           >
             <LogOut size={16} />
             Logout
@@ -255,11 +228,11 @@ export default function Navbar() {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0a1020] border-b border-white/5 shadow-lg shadow-black/30">
-      {/* decorative blue glow at the corners */}
+    <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm dark:bg-[#0a1020] dark:border-white/5 dark:shadow-lg dark:shadow-black/30 transition-colors">
+      {/* decorative glow at the corners */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-16 -top-10 h-40 w-64 rounded-full bg-blue-600/30 blur-3xl" />
-        <div className="absolute -right-16 -bottom-10 h-40 w-64 rounded-full bg-indigo-600/30 blur-3xl" />
+        <div className="absolute -left-16 -top-10 h-40 w-64 rounded-full bg-blue-400/20 dark:bg-blue-600/30 blur-3xl" />
+        <div className="absolute -right-16 -bottom-10 h-40 w-64 rounded-full bg-indigo-400/20 dark:bg-indigo-600/30 blur-3xl" />
       </div>
 
       <div className="relative flex h-20 items-center justify-between gap-4 px-4 sm:px-8">
@@ -267,11 +240,11 @@ export default function Navbar() {
         <Link to={links[0].to} className="flex items-center gap-3 shrink-0">
           <AnimatedLogo size={40} letter="R" />
           <div className="leading-tight">
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               ResuMatch{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">AI</span>
+              <span className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500 bg-clip-text text-transparent">AI</span>
             </p>
-            <p className="hidden xl:block text-xs text-gray-400">Smarter Hiring. Better Matches.</p>
+            <p className="hidden xl:block text-xs text-gray-500 dark:text-gray-400">Smarter Hiring. Better Matches.</p>
           </div>
         </Link>
 
@@ -287,7 +260,7 @@ export default function Navbar() {
           {isAuthenticated && user ? (
             <>
               <NotificationBell notifications={notifications} />
-              <div className="hidden sm:block h-8 w-px bg-white/10" />
+              <div className="hidden sm:block h-8 w-px bg-gray-200 dark:bg-white/10" />
               <ProfileMenu user={user} />
             </>
           ) : (
@@ -295,13 +268,13 @@ export default function Navbar() {
               <button
                 onClick={() => dispatch(toggleTheme())}
                 aria-label="Toggle dark mode"
-                className="p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                className={ICON_BTN}
               >
                 {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-full text-sm font-medium text-gray-200 border border-white/15 hover:bg-white/5 transition-colors"
+                className="px-4 py-2 rounded-full text-sm font-medium transition-colors text-gray-700 border border-gray-300 hover:bg-gray-100 dark:text-gray-200 dark:border-white/15 dark:hover:bg-white/5"
               >
                 Login
               </Link>
@@ -316,7 +289,7 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <button
-            className="lg:hidden p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/5"
+            className={`lg:hidden ${ICON_BTN}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
@@ -327,7 +300,7 @@ export default function Navbar() {
 
       {/* Navigation (mobile) */}
       {mobileOpen && (
-        <nav className="relative lg:hidden border-t border-white/5 px-4 py-3 flex flex-col gap-1">
+        <nav className="relative lg:hidden border-t border-gray-200 dark:border-white/5 px-4 py-3 flex flex-col gap-1">
           {links.map((link) => (
             <NavItem key={link.to} {...link} mobile onClick={() => setMobileOpen(false)} />
           ))}
